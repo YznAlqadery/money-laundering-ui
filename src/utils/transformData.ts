@@ -1,4 +1,4 @@
-import type { LinkType, NodeType, RawData } from "../App";
+import type { LinkType, NodeType, RawData } from "../app/App";
 
 // Transform backend data to react-force-graph format
 export function transformData(data: RawData) {

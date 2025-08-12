@@ -1,6 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ForceGraph2D, { type ForceGraphMethods } from "react-force-graph-2d";
-import { transformData } from "./utils/transformData";
+import { transformData } from "../../utils/transformData";
+import { useAuth } from "../context/AuthContext";
 
 export type NodeType = {
   id: string;
@@ -35,7 +37,10 @@ export type RawData = {
   relationships: RawRelationship[];
 };
 
-export default function App() {
+export default function FraudCycles() {
+  const { token } = useAuth();
+  const navigate = useNavigate();
+
   const [graphData, setGraphData] = useState<{
     nodes: NodeType[];
     links: LinkType[];
@@ -47,25 +52,50 @@ export default function App() {
   const fgRef = useRef<ForceGraphMethods>();
 
   useEffect(() => {
-    fetch(import.meta.env.VITE_API_URL)
-      .then((res) => res.json())
-      .then((data: RawData) => {
-        setGraphData(transformData(data));
-      });
-  }, []);
+    if (!token) {
+      navigate("/login"); // redirect if no token
+      return;
+    }
 
-  // Optional: increase node spacing by modifying force parameters
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/fraud-cycles`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch fraud cycles");
+        }
+
+        const data: RawData = await response.json();
+        const transformedData = transformData(data);
+        setGraphData(transformedData);
+      } catch (error) {
+        console.error("Error fetching fraud cycles:", error);
+      }
+    };
+
+    fetchData();
+  }, [token, navigate]);
+
   useEffect(() => {
     if (!fgRef.current) return;
 
     const fg = fgRef.current;
-
-    // Increase charge strength (more repulsion)
-    fg.d3Force("charge")?.strength(-300);
-
-    // Increase link distance (more spacing)
-    fg.d3Force("link")?.distance(150);
+    fg.d3Force("charge")?.strength(-300); // more repulsion
+    fg.d3Force("link")?.distance(150); // more spacing
   }, [graphData]);
+
+  if (!token) {
+    return null; // nothing while redirecting
+  }
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
@@ -95,13 +125,11 @@ export default function App() {
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
 
-          // Draw node circle bigger
           ctx.fillStyle = node.label === "Account" ? "orange" : "lightblue";
           ctx.beginPath();
           ctx.arc(node.x!, node.y!, 14, 0, 2 * Math.PI, false);
           ctx.fill();
 
-          // Draw label below node circle
           ctx.fillStyle = "black";
           ctx.fillText(label, node.x!, node.y! + 14);
         }}
