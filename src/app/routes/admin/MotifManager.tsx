@@ -3,7 +3,7 @@ import MotifForm from "../../../components/MotifForm";
 import { useAuth } from "../../context/AuthContext";
 
 export type Motif = {
-  id: number;
+  id: number | null;
   name: string;
   description: string;
   cypherQuery: string;
@@ -68,28 +68,45 @@ export default function MotifManager() {
   };
 
   const handleSave = async (motif: Motif) => {
-    // Update existing motif
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/motifs/${motif.id}`,
-      {
-        method: "PUT",
+    if (!motif.id) {
+      // Create new motif, if id is null or falsy value(0, null, undefined)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/motifs`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(motif),
+      });
+      if (response.ok) {
+        const newMotif = await response.json();
+        setMotifs([...motifs, newMotif]);
+        setSelectedMotif(null);
+      } else {
+        console.error("Failed to create motif:", response.statusText);
       }
-    );
-    if (response.ok) {
-      const updatedMotif = await response.json();
-      setMotifs(
-        motifs.map((motif) =>
-          motif.id === updatedMotif.id ? updatedMotif : motif
-        )
-      );
-      setSelectedMotif(null);
     } else {
-      console.error("Failed to update motif:", response.statusText);
+      // Update existing motif
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/motifs/${motif.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(motif),
+        }
+      );
+      if (response.ok) {
+        const updatedMotif = await response.json();
+        setMotifs(
+          motifs.map((m) => (m.id === updatedMotif.id ? updatedMotif : m))
+        );
+        setSelectedMotif(null);
+      } else {
+        console.error("Failed to update motif:", response.statusText);
+      }
     }
   };
 
@@ -109,11 +126,11 @@ export default function MotifManager() {
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             onClick={() =>
               setSelectedMotif({
-                id: 0,
+                id: null,
                 name: "",
                 description: "",
                 cypherQuery: "",
-                active: true,
+                active: false,
               })
             }
           >
@@ -141,7 +158,7 @@ export default function MotifManager() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(motif.id);
+                      handleDelete(motif.id!);
                     }}
                     className="text-red-500 hover:text-red-700 font-bold px-2"
                     title="Delete motif"
