@@ -2,67 +2,55 @@ import { useState, useEffect } from "react";
 import MotifForm from "../../../components/MotifForm";
 import { useAuth } from "../../context/AuthContext";
 
-export type MotifQuery = {
-  id: string;
+export type Motif = {
+  id: number;
   name: string;
   description: string;
-  query: string;
-  assignedTo: number[]; // user IDs as numbers now
-  isActive: boolean;
-};
-
-type User = {
-  id: number; // number type to match API
-  username: string;
+  cypherQuery: string;
+  active: boolean;
 };
 
 export default function MotifManager() {
   const { token } = useAuth();
-  const [motifs, setMotifs] = useState<MotifQuery[]>([]);
-  const [selectedMotif, setSelectedMotif] = useState<MotifQuery | null>(null);
+  const [motifs, setMotifs] = useState<Motif[]>([]);
+  const [selectedMotif, setSelectedMotif] = useState<Motif | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
 
   // Fetch users once on mount
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setUsers(data);
+  //     } else {
+  //       console.error("Failed to fetch users:", response.statusText);
+  //     }
+  //   };
+  //   if (token) fetchUsers();
+  // }, [token]);
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+    const fetchMotifs = async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/motifs`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);
+        console.log(data);
+        setMotifs(data);
       } else {
-        console.error("Failed to fetch users:", response.statusText);
+        console.error("Failed to fetch motifs:", response.statusText);
       }
     };
-    if (token) fetchUsers();
+    if (token) fetchMotifs();
   }, [token]);
-
-  // Your existing motif loading logic here (replace with real API later)
-  useEffect(() => {
-    setMotifs([
-      {
-        id: "1",
-        name: "Circular Transactions",
-        description: "Detect cycles in transaction graph.",
-        query: "MATCH (a)-[:SENT]->(b)-[:SENT]->(c)-[:SENT]->(a) RETURN a,b,c",
-        assignedTo: [1, 2], // number user IDs
-        isActive: true,
-      },
-      {
-        id: "2",
-        name: "Rapid Layering",
-        description: "Funds moving fast through many accounts.",
-        query:
-          "MATCH (a)-[:SENT*3..5]->(b) WHERE duration.between(a.first_tx_time,b.last_tx_time).hours < 24 RETURN a,b",
-        assignedTo: [3],
-        isActive: false,
-      },
-    ]);
-  }, []);
 
   const filteredMotifs = motifs.filter(
     (m) =>
@@ -70,23 +58,39 @@ export default function MotifManager() {
       m.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelect = (motif: MotifQuery) => setSelectedMotif(motif);
+  const handleSelect = (motif: Motif) => setSelectedMotif(motif);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this motif?")) {
       setMotifs(motifs.filter((m) => m.id !== id));
       if (selectedMotif?.id === id) setSelectedMotif(null);
     }
   };
 
-  const handleSave = (motif: MotifQuery) => {
-    if (motif.id) {
-      setMotifs((ms) => ms.map((m) => (m.id === motif.id ? motif : m)));
+  const handleSave = async (motif: Motif) => {
+    // Update existing motif
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/motifs/${motif.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(motif),
+      }
+    );
+    if (response.ok) {
+      const updatedMotif = await response.json();
+      setMotifs(
+        motifs.map((motif) =>
+          motif.id === updatedMotif.id ? updatedMotif : motif
+        )
+      );
+      setSelectedMotif(null);
     } else {
-      motif.id = Date.now().toString();
-      setMotifs((ms) => [...ms, motif]);
+      console.error("Failed to update motif:", response.statusText);
     }
-    setSelectedMotif(null);
   };
 
   return (
@@ -105,12 +109,11 @@ export default function MotifManager() {
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             onClick={() =>
               setSelectedMotif({
-                id: "",
+                id: 0,
                 name: "",
                 description: "",
-                query: "",
-                assignedTo: [],
-                isActive: true,
+                cypherQuery: "",
+                active: true,
               })
             }
           >
@@ -151,25 +154,15 @@ export default function MotifManager() {
                 {motif.description}
               </p>
               <p className="mt-1 text-xs">
-                Assigned To:{" "}
-                {motif.assignedTo.length > 0
-                  ? motif.assignedTo
-                      .map(
-                        (id) => users.find((u) => u.id === id)?.username || id
-                      )
-                      .join(", ")
-                  : "None"}
-              </p>
-              <p className="mt-1 text-xs">
                 Status:{" "}
                 <span
                   className={
-                    motif.isActive
+                    motif.active
                       ? "text-green-600 font-semibold"
                       : "text-red-600 font-semibold"
                   }
                 >
-                  {motif.isActive ? "Active" : "Inactive"}
+                  {motif.active ? "Active" : "Inactive"}
                 </span>
               </p>
             </div>
@@ -184,7 +177,6 @@ export default function MotifManager() {
             motif={selectedMotif}
             onSave={handleSave}
             onCancel={() => setSelectedMotif(null)}
-            users={users}
           />
         ) : (
           <p className="text-gray-500 text-center mt-12">

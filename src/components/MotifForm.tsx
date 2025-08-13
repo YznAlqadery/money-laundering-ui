@@ -1,29 +1,17 @@
 import { useState, useEffect } from "react";
-import type { MotifQuery } from "../app/routes/admin/MotifManager";
-
-type User = {
-  id: number;
-  username: string;
-};
+import type { Motif } from "../app/routes/admin/MotifManager";
 
 interface MotifFormProps {
-  motif: MotifQuery;
-  users: User[];
-  onSave: (motif: MotifQuery) => void;
+  motif: Motif;
+  onSave: (motif: Motif) => void;
   onCancel: () => void;
 }
 
-export default function MotifForm({
-  motif,
-  users,
-  onSave,
-  onCancel,
-}: MotifFormProps) {
+export default function MotifForm({ motif, onSave, onCancel }: MotifFormProps) {
   const [name, setName] = useState(motif.name);
   const [description, setDescription] = useState(motif.description);
-  const [query, setQuery] = useState(motif.query);
-  const [assignedTo, setAssignedTo] = useState<number[]>(motif.assignedTo);
-  const [isActive, setIsActive] = useState(motif.isActive);
+  const [cypherQuery, setCypherQuery] = useState(motif.cypherQuery);
+  const [isActive, setIsActive] = useState(motif.active);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -31,16 +19,16 @@ export default function MotifForm({
     // Update local state when motif prop changes (e.g. selecting a different motif)
     setName(motif.name);
     setDescription(motif.description);
-    setQuery(motif.query);
-    setAssignedTo(motif.assignedTo);
-    setIsActive(motif.isActive);
+    setCypherQuery(motif.cypherQuery);
+    setIsActive(motif.active);
     setErrors({});
   }, [motif]);
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
     if (!name.trim()) newErrors.name = "Name is required";
-    if (!query.trim()) newErrors.query = "Query is required";
+    if (!cypherQuery.trim()) newErrors.cypherQuery = "Query is required";
+    if (!description.trim()) newErrors.description = "Description is required";
     return newErrors;
   };
 
@@ -55,16 +43,9 @@ export default function MotifForm({
       ...motif,
       name: name.trim(),
       description: description.trim(),
-      query: query.trim(),
-      assignedTo,
-      isActive,
+      cypherQuery: cypherQuery.trim(),
+      active: isActive,
     });
-  };
-
-  const handleUserSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions);
-    const selectedIds = selectedOptions.map((opt) => Number(opt.value));
-    setAssignedTo(selectedIds);
   };
 
   return (
@@ -88,7 +69,9 @@ export default function MotifForm({
       />
       {errors.name && <p className="text-red-500 mb-2">{errors.name}</p>}
 
-      <label className="block mb-1 font-semibold">Description</label>
+      <label className="block mb-1 font-semibold">
+        Description <span className="text-red-500">*</span>
+      </label>
       <textarea
         className="w-full border border-gray-300 p-2 rounded-md mb-2"
         rows={3}
@@ -104,27 +87,12 @@ export default function MotifForm({
           errors.query ? "border-red-500" : "border-gray-300"
         }`}
         rows={6}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        value={cypherQuery}
+        onChange={(e) => setCypherQuery(e.target.value)}
       />
-      {errors.query && <p className="text-red-500 mb-2">{errors.query}</p>}
-
-      <label className="block mb-1 font-semibold">
-        Assign To (select users)
-      </label>
-      <select
-        multiple
-        className="w-full border border-gray-300 p-2 rounded-md mb-4"
-        value={assignedTo.map(String)}
-        onChange={handleUserSelect}
-        size={Math.min(5, users.length)} // limit visible rows to 5 max
-      >
-        {users.map((user) => (
-          <option key={user.id} value={user.id}>
-            {user.username}
-          </option>
-        ))}
-      </select>
+      {errors.cypherQuery && (
+        <p className="text-red-500 mb-2">{errors.cypherQuery}</p>
+      )}
 
       <label className="flex items-center mb-4">
         <input
