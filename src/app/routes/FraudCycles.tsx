@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import ForceGraph2D, { type ForceGraphMethods } from "react-force-graph-2d";
 import { transformData } from "../../utils/transformData";
 import { useAuth } from "../context/AuthContext";
@@ -11,19 +10,8 @@ export type NodeType = {
   x?: number;
   y?: number;
 };
-
-export type LinkType = {
-  source: string;
-  target: string;
-  label: string;
-};
-
-export type RawNode = {
-  id: string;
-  labels: string[];
-  properties: any;
-};
-
+export type LinkType = { source: string; target: string; label: string };
+export type RawNode = { id: string; labels: string[]; properties: any };
 type RawRelationship = {
   id: string;
   startNode: number;
@@ -31,16 +19,20 @@ type RawRelationship = {
   type: string;
   properties: any;
 };
+export type RawData = { nodes: RawNode[]; relationships: RawRelationship[] };
 
-export type RawData = {
-  nodes: RawNode[];
-  relationships: RawRelationship[];
+export type Motif = {
+  id: number;
+  name: string;
+  description: string;
+  cypherQuery: string;
+  active: boolean;
 };
 
 export default function FraudCycles() {
   const { token } = useAuth();
-  const navigate = useNavigate();
-
+  const [motifs, setMotifs] = useState<Motif[]>([]);
+  const [selectedMotif, setSelectedMotif] = useState<Motif | null>(null);
   const [graphData, setGraphData] = useState<{
     nodes: NodeType[];
     links: LinkType[];
@@ -51,56 +43,83 @@ export default function FraudCycles() {
 
   const fgRef = useRef<ForceGraphMethods>();
 
+  // Fetch motifs
   useEffect(() => {
-    if (!token) {
-      navigate("/login"); // redirect if no token
-      return;
-    }
+    if (!token) return;
 
-    const fetchData = async () => {
+    const fetchMotifs = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/fraud-cycles`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch fraud cycles");
-        }
-
-        const data: RawData = await response.json();
-        const transformedData = transformData(data);
-        setGraphData(transformedData);
-      } catch (error) {
-        console.error("Error fetching fraud cycles:", error);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/motifs`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch motifs");
+        const data = await res.json();
+        setMotifs(data);
+      } catch (err) {
+        console.error(err);
       }
     };
+    fetchMotifs();
+  }, [token]);
 
-    fetchData();
-  }, [token, navigate]);
+  // Fetch graph data on motif selection
+  useEffect(() => {
+    if (!selectedMotif || !token) return;
 
+    const fetchGraph = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/fraud-cycles/${selectedMotif.id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) throw new Error("Failed to fetch fraud cycles");
+        const data: RawData = await res.json();
+        setGraphData(transformData(data));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchGraph();
+  }, [selectedMotif, token]);
+
+  // Graph physics
   useEffect(() => {
     if (!fgRef.current) return;
-
     const fg = fgRef.current;
-    fg.d3Force("charge")?.strength(-300); // more repulsion
-    fg.d3Force("link")?.distance(150); // more spacing
+    fg.d3Force("charge")?.strength(-300);
+    fg.d3Force("link")?.distance(150);
   }, [graphData]);
 
-  if (!token) {
-    return null; // nothing while redirecting
-  }
+  if (!token) return null;
 
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
+    <div className="relative w-screen h-screen">
+      {/* Motif Selector Overlay */}
+      <div className="absolute top-4 left-4 bg-white p-4 rounded shadow z-10">
+        <label className="mr-2 font-semibold">Select Motif:</label>
+        <select
+          value={selectedMotif?.id ?? ""}
+          onChange={(e) =>
+            setSelectedMotif(
+              motifs.find((m) => m.id === Number(e.target.value)) || null
+            )
+          }
+          className="border p-1 rounded"
+        >
+          <option value="">-- Choose Motif --</option>
+          {motifs.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Force Graph */}
       <ForceGraph2D
         ref={fgRef}
+        width={window.innerWidth}
+        height={window.innerHeight}
         graphData={graphData}
         nodeAutoColorBy="label"
         linkCurvature={0.25}
@@ -111,7 +130,7 @@ export default function FraudCycles() {
         linkLabel={(link) => link.label}
         nodeLabel={(node) =>
           node.label === "Account"
-            ? `Account: ${node.properties.accountNumber.toString()}`
+            ? `Account: ${node.properties.accountNumber}`
             : `Txn: £${node.properties.amountPaid?.toLocaleString() ?? "N/A"}`
         }
         nodeCanvasObject={(node, ctx, globalScale) => {
@@ -119,17 +138,14 @@ export default function FraudCycles() {
             node.label === "Account"
               ? "Account"
               : `£${node.properties.amountPaid?.toLocaleString() ?? ""}`;
-
           const fontSize = 14 / globalScale;
           ctx.font = `${fontSize}px Sans-Serif`;
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
-
           ctx.fillStyle = node.label === "Account" ? "orange" : "lightblue";
           ctx.beginPath();
           ctx.arc(node.x!, node.y!, 14, 0, 2 * Math.PI, false);
           ctx.fill();
-
           ctx.fillStyle = "black";
           ctx.fillText(label, node.x!, node.y! + 14);
         }}
