@@ -4,6 +4,7 @@ import Login from "./Login";
 import Signup from "./Signup";
 import FraudCycles from "./FraudCycles";
 import MotifManager from "./admin/MotifManager";
+import Users from "./admin/Users";
 
 export default function AppRoutes() {
   return (
@@ -13,6 +14,7 @@ export default function AppRoutes() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/fraud-cycles" element={<FraudCycles />} />
       <Route path="/admin" element={<MotifManager />} />
+      <Route path="/users" element={<Users />} />
     </Routes>
   );
 }

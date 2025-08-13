@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import MotifForm from "../../../components/MotifForm";
 import { useAuth } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
 
 export type Motif = {
   id: number | null;
@@ -60,10 +61,28 @@ export default function MotifManager() {
 
   const handleSelect = (motif: Motif) => setSelectedMotif(motif);
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this motif?")) {
+  const handleDelete = async (id: number) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this motif? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return; // user canceled
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/motifs/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.ok) {
       setMotifs(motifs.filter((m) => m.id !== id));
-      if (selectedMotif?.id === id) setSelectedMotif(null);
+      setSelectedMotif(null);
+    } else {
+      console.error("Failed to delete motif:", response.statusText);
     }
   };
 
@@ -136,6 +155,12 @@ export default function MotifManager() {
           >
             + Add New
           </button>
+          <Link
+            to="/users"
+            className="ml-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+          >
+            Users
+          </Link>
         </div>
 
         <div className="overflow-y-auto max-h-[70vh] border rounded-md divide-y">
