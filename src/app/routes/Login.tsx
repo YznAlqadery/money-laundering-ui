@@ -41,7 +41,6 @@ export default function Login() {
         login({ username: data.username, role: data.role }, data.jwtToken);
         setUsername("");
         setPassword("");
-        console.log(data.role);
         if (data.role?.toString().trim().toUpperCase() === "ADMIN") {
           navigate("/admin");
         } else {
@@ -54,60 +53,62 @@ export default function Login() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-san-marino-200 via-san-marino-300 to-san-marino-400 font-poppins">
       <Navbar />
-      <div className="min-h-screen flex flex-col items-center justify-center bg-san-marino-300 px-4 sm:no-scrollbar overflow-auto">
-        <h1 className="text-3xl font-bold mb-4 text-center text-san-marino-950">
-          Login
-        </h1>
+      <div className="flex-grow flex items-center justify-center px-4 sm:px-6">
         <form
-          className="bg-san-marino-50 shadow-md rounded-lg p-8 max-w-md w-full"
           onSubmit={handleSubmit}
+          className="bg-san-marino-50 shadow-lg rounded-2xl p-8 sm:p-10 w-full max-w-md"
         >
-          <label
-            htmlFor="username"
-            className="block text-san-marino-950 font-semibold mb-2"
-          >
-            Username:
-          </label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            className="w-full border border-san-marino-600 rounded-md p-2 mb-6 focus:outline-none focus:ring-1 focus:ring-san-marino-800"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          <h1 className="text-3xl font-bold text-center text-san-marino-950 mb-6">
+            Welcome Back
+          </h1>
 
-          <label
-            htmlFor="password"
-            className="block text-san-marino-950 font-semibold mb-2"
-          >
-            Password:
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            className="w-full border border-san-marino-500 rounded-md p-2 mb-6 focus:outline-none focus:ring-1 focus:ring-san-marino-800"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          {/* Username */}
+          <div className="mb-6">
+            <label
+              htmlFor="username"
+              className="block text-san-marino-900 font-semibold mb-2"
+            >
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              className="w-full border border-san-marino-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-san-marino-600 transition"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
 
-          <input
+          {/* Password */}
+          <div className="mb-6">
+            <label
+              htmlFor="password"
+              className="block text-san-marino-900 font-semibold mb-2"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              className="w-full border border-san-marino-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-san-marino-600 transition"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
             type="submit"
-            value="Submit"
-            className="w-full bg-san-marino-950 text-san-marino-50 font-semibold py-3 rounded-md cursor-pointer hover:bg-san-marino-700 transition-colors"
-          />
-
-          <p className="mt-6 text-center text-san-marino-600">
-            Don't have an account?{" "}
-            <a href="/signup" className="text-san-marino-950 hover:underline">
-              Sign up
-            </a>
-          </p>
+            className="w-full bg-san-marino-600 text-san-marino-50 font-semibold py-3 rounded-lg hover:bg-san-marino-700 transition-colors"
+          >
+            Sign In
+          </button>
         </form>
       </div>
     </div>

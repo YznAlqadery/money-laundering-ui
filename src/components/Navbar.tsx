@@ -2,11 +2,11 @@ import LogoutButton from "./LogoutButton";
 
 export default function Navbar() {
   return (
-    <nav className="bg-san-marino-50 shadow-md">
+    <nav className="bg-san-marino-800 shadow-md font-poppins">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
-            <a href="/" className="text-xl font-bold text-gray-800">
+            <a href="/" className="text-xl font-bold text-san-marino-50">
               FraudGuard
             </a>
           </div>

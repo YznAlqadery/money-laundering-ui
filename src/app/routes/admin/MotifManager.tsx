@@ -17,34 +17,13 @@ export default function MotifManager() {
   const [selectedMotif, setSelectedMotif] = useState<Motif | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch users once on mount
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setUsers(data);
-  //     } else {
-  //       console.error("Failed to fetch users:", response.statusText);
-  //     }
-  //   };
-  //   if (token) fetchUsers();
-  // }, [token]);
-
   useEffect(() => {
     const fetchMotifs = async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/motifs`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setMotifs(data);
       } else {
         console.error("Failed to fetch motifs:", response.statusText);
@@ -65,16 +44,13 @@ export default function MotifManager() {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this motif? This action cannot be undone."
     );
-
-    if (!confirmDelete) return; // user canceled
+    if (!confirmDelete) return;
 
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/motifs/${id}`,
       {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
@@ -88,7 +64,6 @@ export default function MotifManager() {
 
   const handleSave = async (motif: Motif) => {
     if (!motif.id) {
-      // Create new motif, if id is null or falsy value(0, null, undefined)
       const response = await fetch(`${import.meta.env.VITE_API_URL}/motifs`, {
         method: "POST",
         headers: {
@@ -105,7 +80,6 @@ export default function MotifManager() {
         console.error("Failed to create motif:", response.statusText);
       }
     } else {
-      // Update existing motif
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/motifs/${motif.id}`,
         {
@@ -130,19 +104,19 @@ export default function MotifManager() {
   };
 
   return (
-    <div className="p-6 flex flex-col lg:flex-row gap-6">
-      {/* Left panel */}
-      <div className="flex-1 max-w-lg">
+    <div className="p-6 flex flex-col lg:flex-row gap-6 font-poppins bg-san-marino-100 min-h-screen">
+      {/* Left Panel */}
+      <div className="flex-1 max-w-lg bg-san-marino-50 shadow-lg rounded-xl p-4 flex flex-col">
         <div className="flex items-center mb-4">
           <input
             type="text"
             placeholder="Search motifs..."
-            className="flex-grow border rounded-md px-3 py-2 mr-2"
+            className="flex-grow border border-san-marino-300 rounded-lg px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-san-marino-600 text-san-marino-50 px-4 py-2 rounded-lg hover:bg-san-marino-700 transition"
             onClick={() =>
               setSelectedMotif({
                 id: null,
@@ -157,42 +131,44 @@ export default function MotifManager() {
           </button>
           <Link
             to="/users"
-            className="ml-4 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+            className="ml-4 bg-san-marino-400 text-san-marino-950 px-4 py-2 rounded-lg hover:bg-san-marino-500 transition"
           >
             Users
           </Link>
         </div>
 
-        <div className="overflow-y-auto max-h-[70vh] border rounded-md divide-y">
+        <div className="overflow-y-auto max-h-[70vh] border border-san-marino-200 rounded-lg divide-y divide-san-marino-200">
           {filteredMotifs.length === 0 && (
-            <p className="p-4 text-gray-500 text-center">No motifs found</p>
+            <p className="p-4 text-san-marino-600 text-center italic">
+              No motifs found
+            </p>
           )}
           {filteredMotifs.map((motif) => (
             <div
               key={motif.id}
-              className={`p-4 cursor-pointer hover:bg-gray-100 flex flex-col ${
+              className={`p-4 cursor-pointer hover:bg-san-marino-100 flex flex-col rounded-lg transition ${
                 selectedMotif?.id === motif.id
-                  ? "bg-blue-50 border-l-4 border-blue-600"
+                  ? "bg-san-marino-200 border-l-4 border-san-marino-600"
                   : ""
               }`}
               onClick={() => handleSelect(motif)}
             >
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">{motif.name}</h3>
-                <div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(motif.id!);
-                    }}
-                    className="text-red-500 hover:text-red-700 font-bold px-2"
-                    title="Delete motif"
-                  >
-                    &times;
-                  </button>
-                </div>
+                <h3 className="text-lg font-semibold text-san-marino-900">
+                  {motif.name}
+                </h3>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(motif.id!);
+                  }}
+                  className="text-red-500 hover:text-red-700 font-bold px-2 transition"
+                  title="Delete motif"
+                >
+                  &times;
+                </button>
               </div>
-              <p className="text-sm text-gray-600 truncate">
+              <p className="text-sm text-san-marino-700 truncate">
                 {motif.description}
               </p>
               <p className="mt-1 text-xs">
@@ -212,8 +188,8 @@ export default function MotifManager() {
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 max-w-lg">
+      {/* Right Panel */}
+      <div className="flex-1 max-w-lg bg-san-marino-50 shadow-lg rounded-xl p-6 flex flex-col">
         {selectedMotif ? (
           <MotifForm
             motif={selectedMotif}
@@ -221,7 +197,7 @@ export default function MotifManager() {
             onCancel={() => setSelectedMotif(null)}
           />
         ) : (
-          <p className="text-gray-500 text-center mt-12">
+          <p className="text-san-marino-600 text-center mt-12 italic">
             Select or add a motif query to edit
           </p>
         )}

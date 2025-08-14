@@ -27,8 +27,9 @@ body,
   --color-san-marino-800: #274265;
   --color-san-marino-900: #253955;
   --color-san-marino-950: #182539;
+  --font-poppins: "Poppins", sans-serif;
 }
 
 body {
-  background-color: var(--color-san-marino-300);
+  background-color: var(--color-san-marino-100);
 }
