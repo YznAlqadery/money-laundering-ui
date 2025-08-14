@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import ForceGraph2D, { type ForceGraphMethods } from "react-force-graph-2d";
 import { transformData } from "../../utils/transformData";
 import { useAuth } from "../context/AuthContext";
+import BackButton from "../../components/BackButton";
+import Navbar from "../../components/Navbar";
 
 export type NodeType = {
   id: string;
@@ -93,63 +95,69 @@ export default function FraudCycles() {
   if (!token) return null;
 
   return (
-    <div className="relative w-screen h-screen">
-      {/* Motif Selector Overlay */}
-      <div className="absolute top-4 left-4 bg-white p-4 rounded shadow z-10">
-        <label className="mr-2 font-semibold">Select Motif:</label>
-        <select
-          value={selectedMotif?.id ?? ""}
-          onChange={(e) =>
-            setSelectedMotif(
-              motifs.find((m) => m.id === Number(e.target.value)) || null
-            )
-          }
-          className="border p-1 rounded"
-        >
-          <option value="">-- Choose Motif --</option>
-          {motifs.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+    <>
+      <div>
+        <Navbar />
       </div>
+      <div className="relative w-screen h-screen">
+        {/* Motif Selector Overlay */}
+        <BackButton page={-3} />
+        <div className="absolute top-4 right-4 bg-white p-4 rounded shadow z-10">
+          <label className="mr-2 font-semibold">Select Motif:</label>
+          <select
+            value={selectedMotif?.id ?? ""}
+            onChange={(e) =>
+              setSelectedMotif(
+                motifs.find((m) => m.id === Number(e.target.value)) || null
+              )
+            }
+            className="border p-1 rounded"
+          >
+            <option value="">-- Choose Motif --</option>
+            {motifs.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Force Graph */}
-      <ForceGraph2D
-        ref={fgRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        graphData={graphData}
-        nodeAutoColorBy="label"
-        linkCurvature={0.25}
-        linkDirectionalArrowLength={10}
-        linkDirectionalArrowRelPos={0.95}
-        linkDirectionalArrowColor={() => "rgba(0,0,0,0.8)"}
-        linkWidth={2}
-        linkLabel={(link) => link.label}
-        nodeLabel={(node) =>
-          node.label === "Account"
-            ? `Account: ${node.properties.accountNumber}`
-            : `Txn: £${node.properties.amountPaid?.toLocaleString() ?? "N/A"}`
-        }
-        nodeCanvasObject={(node, ctx, globalScale) => {
-          const label =
+        {/* Force Graph */}
+        <ForceGraph2D
+          ref={fgRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          graphData={graphData}
+          nodeAutoColorBy="label"
+          linkCurvature={0.25}
+          linkDirectionalArrowLength={10}
+          linkDirectionalArrowRelPos={0.95}
+          linkDirectionalArrowColor={() => "rgba(0,0,0,0.8)"}
+          linkWidth={2}
+          linkLabel={(link) => link.label}
+          nodeLabel={(node) =>
             node.label === "Account"
-              ? "Account"
-              : `£${node.properties.amountPaid?.toLocaleString() ?? ""}`;
-          const fontSize = 14 / globalScale;
-          ctx.font = `${fontSize}px Sans-Serif`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "top";
-          ctx.fillStyle = node.label === "Account" ? "orange" : "lightblue";
-          ctx.beginPath();
-          ctx.arc(node.x!, node.y!, 14, 0, 2 * Math.PI, false);
-          ctx.fill();
-          ctx.fillStyle = "black";
-          ctx.fillText(label, node.x!, node.y! + 14);
-        }}
-      />
-    </div>
+              ? `Account: ${node.properties.accountNumber}`
+              : `Txn: £${node.properties.amountPaid?.toLocaleString() ?? "N/A"}`
+          }
+          nodeCanvasObject={(node, ctx, globalScale) => {
+            const label =
+              node.label === "Account"
+                ? "Account"
+                : `£${node.properties.amountPaid?.toLocaleString() ?? ""}`;
+            const fontSize = 14 / globalScale;
+            ctx.font = `${fontSize}px Sans-Serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillStyle = node.label === "Account" ? "orange" : "lightblue";
+            ctx.beginPath();
+            ctx.arc(node.x!, node.y!, 14, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.fillStyle = "black";
+            ctx.fillText(label, node.x!, node.y! + 14);
+          }}
+        />
+      </div>
+    </>
   );
 }

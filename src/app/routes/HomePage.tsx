@@ -24,12 +24,6 @@ export default function HomePage() {
         </p>
         <div className="flex flex-col sm:flex-row justify-center mt-2 mb-6 gap-1 sm:gap-10 w-full max-w-md px-2 sm:px-0 sm:mt-6">
           <Link
-            to={"/signup"}
-            className="bg-white text-gray-800 px-4 py-2 rounded-full text-lg font-medium hover:bg-gray-100 text-center sm:px-8"
-          >
-            Get Started
-          </Link>
-          <Link
             to={"/login"}
             className="bg-white text-gray-800 px-4 py-2 rounded-full text-lg font-medium hover:bg-gray-100 text-center sm:px-8"
           >
