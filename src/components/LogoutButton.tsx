@@ -10,9 +10,7 @@ export default function LogoutButton() {
         logout();
         navigate("/");
       }}
-      className="
-  bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded
-  "
+      className="bg-san-marino-300 text-san-marino-950 px-4 py-2 rounded-full text-lg font-medium hover:bg-san-marino-200 hover:cursor-pointer text-center  sm:px-8"
     >
       Logout
     </button>

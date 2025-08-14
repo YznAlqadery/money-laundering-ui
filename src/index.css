@@ -14,3 +14,21 @@ body,
   width: 100%;
   height: 100%;
 }
+
+@theme {
+  --color-san-marino-50: #f4f7fb;
+  --color-san-marino-100: #e8edf6;
+  --color-san-marino-200: #cbdaec;
+  --color-san-marino-300: #9dbbdc;
+  --color-san-marino-400: #6896c8;
+  --color-san-marino-500: #4275ab;
+  --color-san-marino-600: #336096;
+  --color-san-marino-700: #2b4d79;
+  --color-san-marino-800: #274265;
+  --color-san-marino-900: #253955;
+  --color-san-marino-950: #182539;
+}
+
+body {
+  background-color: var(--color-san-marino-300);
+}

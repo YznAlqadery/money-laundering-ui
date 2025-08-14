@@ -56,15 +56,17 @@ export default function Login() {
   return (
     <div>
       <Navbar />
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4 sm:no-scrollbar overflow-auto">
-        <h1 className="text-3xl font-bold mb-4 text-center">Login</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-san-marino-300 px-4 sm:no-scrollbar overflow-auto">
+        <h1 className="text-3xl font-bold mb-4 text-center text-san-marino-950">
+          Login
+        </h1>
         <form
-          className="bg-white shadow-md rounded-lg p-8 max-w-md w-full"
+          className="bg-san-marino-50 shadow-md rounded-lg p-8 max-w-md w-full"
           onSubmit={handleSubmit}
         >
           <label
             htmlFor="username"
-            className="block text-gray-700 font-semibold mb-2"
+            className="block text-san-marino-950 font-semibold mb-2"
           >
             Username:
           </label>
@@ -72,7 +74,7 @@ export default function Login() {
             type="text"
             id="username"
             name="username"
-            className="w-full border border-gray-300 rounded-md p-2 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-san-marino-600 rounded-md p-2 mb-6 focus:outline-none focus:ring-1 focus:ring-san-marino-800"
             placeholder="Enter your username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -80,7 +82,7 @@ export default function Login() {
 
           <label
             htmlFor="password"
-            className="block text-gray-700 font-semibold mb-2"
+            className="block text-san-marino-950 font-semibold mb-2"
           >
             Password:
           </label>
@@ -88,7 +90,7 @@ export default function Login() {
             type="password"
             id="password"
             name="password"
-            className="w-full border border-gray-300 rounded-md p-2 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-san-marino-500 rounded-md p-2 mb-6 focus:outline-none focus:ring-1 focus:ring-san-marino-800"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -97,12 +99,12 @@ export default function Login() {
           <input
             type="submit"
             value="Submit"
-            className="w-full bg-blue-600 text-white font-semibold py-3 rounded-md cursor-pointer hover:bg-blue-700 transition-colors"
+            className="w-full bg-san-marino-950 text-san-marino-50 font-semibold py-3 rounded-md cursor-pointer hover:bg-san-marino-700 transition-colors"
           />
 
-          <p className="mt-6 text-center text-gray-600">
+          <p className="mt-6 text-center text-san-marino-600">
             Don't have an account?{" "}
-            <a href="/signup" className="text-blue-600 hover:underline">
+            <a href="/signup" className="text-san-marino-950 hover:underline">
               Sign up
             </a>
           </p>
