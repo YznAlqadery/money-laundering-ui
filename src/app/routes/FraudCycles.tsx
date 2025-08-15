@@ -94,6 +94,8 @@ export default function FraudCycles() {
 
   if (!token) return null;
 
+  const filteredMotifs = motifs.filter((motif) => motif.active);
+
   return (
     <div className="h-screen w-screen flex flex-col font-poppins bg-san-marino-50">
       <Navbar />
@@ -112,13 +114,14 @@ export default function FraudCycles() {
             value={selectedMotif?.id ?? ""}
             onChange={(e) =>
               setSelectedMotif(
-                motifs.find((m) => m.id === Number(e.target.value)) || null
+                filteredMotifs.find((m) => m.id === Number(e.target.value)) ||
+                  null
               )
             }
             className="w-56 border border-san-marino-300 rounded-md p-2 focus:ring-2 focus:ring-san-marino-600 focus:outline-none text-sm"
           >
             <option value="">-- Choose Motif --</option>
-            {motifs.map((m) => (
+            {filteredMotifs.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
               </option>

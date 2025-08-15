@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import Navbar from "../../../components/Navbar";
 
 type User = {
   id: number | null;
@@ -95,110 +96,115 @@ export default function Users() {
   };
 
   return (
-    <div className="p-6 font-poppins bg-san-marino-100 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-san-marino-900">Users</h1>
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="bg-san-marino-600 text-san-marino-50 px-4 py-2 rounded-lg hover:bg-san-marino-700 transition"
-        >
-          + Create New User
-        </button>
-      </div>
+    <div>
+      <Navbar />
+      <div className="p-6 font-poppins bg-san-marino-100 min-h-screen sm:min-h-full">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+          <h1 className="text-2xl font-bold text-san-marino-900">Users</h1>
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="bg-san-marino-600 text-san-marino-50 px-4 py-2 rounded-lg hover:bg-san-marino-700 transition"
+          >
+            + Create New User
+          </button>
+        </div>
 
-      {/* Create User Form */}
-      {showCreateForm && (
-        <form
-          onSubmit={handleCreate}
-          className="bg-san-marino-50 p-6 rounded-xl shadow-md mb-6 border border-san-marino-200"
-        >
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="text"
-              placeholder="Username"
-              value={newUser.username}
-              onChange={(e) =>
-                setNewUser({ ...newUser, username: e.target.value })
-              }
-              className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
-              required
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={newUser.password}
-              onChange={(e) =>
-                setNewUser({ ...newUser, password: e.target.value })
-              }
-              className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
-              required
-            />
-            <select
-              value={newUser.role}
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
-              required
-            >
-              {roles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              Create
-            </button>
-          </div>
-        </form>
-      )}
+        {/* Create User Form */}
+        {showCreateForm && (
+          <form
+            onSubmit={handleCreate}
+            className="bg-san-marino-50 p-6 rounded-xl shadow-md mb-6 border border-san-marino-200"
+          >
+            <div className="flex flex-col md:flex-row gap-4">
+              <input
+                type="text"
+                placeholder="Username"
+                value={newUser.username}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, username: e.target.value })
+                }
+                className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
+                required
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={newUser.password}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, password: e.target.value })
+                }
+                className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
+                required
+              />
+              <select
+                value={newUser.role}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, role: e.target.value })
+                }
+                className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
+                required
+              >
+                {roles.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                Create
+              </button>
+            </div>
+          </form>
+        )}
 
-      {/* Users Table */}
-      <div className="overflow-x-auto bg-san-marino-50 rounded-xl shadow-md border border-san-marino-200">
-        <table className="min-w-full">
-          <thead className="bg-san-marino-200 text-san-marino-900">
-            <tr>
-              <th className="text-left py-3 px-4">ID</th>
-              <th className="text-left py-3 px-4">Username</th>
-              <th className="text-left py-3 px-4">Role</th>
-              <th className="text-left py-3 px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length > 0 ? (
-              users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="border-b border-san-marino-200 hover:bg-san-marino-100 transition"
-                >
-                  <td className="py-3 px-4">{user.id}</td>
-                  <td className="py-3 px-4">{user.username}</td>
-                  <td className="py-3 px-4">{user.role}</td>
-                  <td className="py-3 px-4">
-                    <button
-                      onClick={() => handleDelete(user.id!)}
-                      className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition"
-                    >
-                      Delete
-                    </button>
+        {/* Users Table */}
+        <div className="overflow-x-auto bg-san-marino-50 rounded-xl shadow-md border border-san-marino-200">
+          <table className="min-w-full">
+            <thead className="bg-san-marino-200 text-san-marino-900">
+              <tr>
+                <th className="text-left py-3 px-4">ID</th>
+                <th className="text-left py-3 px-4">Username</th>
+                <th className="text-left py-3 px-4">Role</th>
+                <th className="text-left py-3 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length > 0 ? (
+                users.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="border-b border-san-marino-200 hover:bg-san-marino-100 transition"
+                  >
+                    <td className="py-3 px-4">{user.id}</td>
+                    <td className="py-3 px-4">{user.username}</td>
+                    <td className="py-3 px-4">{user.role}</td>
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => handleDelete(user.id!)}
+                        className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    className="py-4 px-4 text-center text-san-marino-600"
+                    colSpan={4}
+                  >
+                    No users found
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  className="py-4 px-4 text-center text-san-marino-600"
-                  colSpan={4}
-                >
-                  No users found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

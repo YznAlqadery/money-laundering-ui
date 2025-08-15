@@ -1,6 +1,8 @@
+import { useAuth } from "../app/context/AuthContext";
 import LogoutButton from "./LogoutButton";
 
 export default function Navbar() {
+  const { token } = useAuth();
   return (
     <nav className="bg-san-marino-800 shadow-md font-poppins">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,9 +14,11 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <div className=" mt-3 sm:flex sm:mt-0 space-x-8 items-center">
-            <LogoutButton />
-          </div>
+          {token && (
+            <div className=" mt-3 sm:flex sm:mt-0 space-x-8 items-center">
+              <LogoutButton />
+            </div>
+          )}
         </div>
       </div>
     </nav>
