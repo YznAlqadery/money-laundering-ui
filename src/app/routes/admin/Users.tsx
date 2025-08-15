@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
 
@@ -56,7 +56,7 @@ export default function Users() {
     }
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -67,12 +67,11 @@ export default function Users() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [token]);
 
-  // useEffect to load on mount
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers, token]);
+  }, [fetchUsers]);
 
   // Submit (create or update)
   const handleSubmit = async (e: React.FormEvent) => {
