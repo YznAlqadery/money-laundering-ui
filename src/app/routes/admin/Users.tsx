@@ -11,9 +11,9 @@ type User = {
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [roles, setRoles] = useState<string[]>([]); // ["USER", "ADMIN"]
-  const [newUser, setNewUser] = useState<User>({
+  const [formUser, setFormUser] = useState<User>({
     id: null,
     username: "",
     role: "USER",
@@ -21,22 +21,7 @@ export default function Users() {
   });
   const { token } = useAuth();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Failed to fetch users");
-        const data = await res.json();
-        setUsers(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchUsers();
-  }, [token]);
-
+  // Fetch roles
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -53,6 +38,7 @@ export default function Users() {
     fetchRoles();
   }, [token]);
 
+  // Delete user
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
@@ -70,31 +56,60 @@ export default function Users() {
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchUsers = async () => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/admin/create-user`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newUser),
-        }
-      );
-      if (res.ok) {
-        const created = await res.json();
-        setUsers([...users, created]);
-        setShowCreateForm(false);
-        setNewUser({ id: 0, username: "", role: "USER", password: "" });
-      } else console.error("Failed to create user");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const data = await res.json();
+      setUsers(data);
     } catch (error) {
       console.error(error);
     }
   };
 
+  // useEffect to load on mount
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers, token]);
+
+  // Submit (create or update)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const url = formUser.id
+        ? `${import.meta.env.VITE_API_URL}/admin/update-user/${formUser.id}`
+        : `${import.meta.env.VITE_API_URL}/admin/create-user`;
+
+      const method = formUser.id ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: formUser.username,
+          role: formUser.role,
+          ...(formUser.id ? {} : { password: formUser.password }),
+        }),
+      });
+
+      if (res.ok) {
+        await fetchUsers();
+
+        setFormUser({ id: null, username: "", role: "USER", password: "" });
+        setShowForm(false);
+      } else {
+        console.error("Failed to submit user");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div>
       <Navbar />
@@ -103,44 +118,54 @@ export default function Users() {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-san-marino-900">Users</h1>
           <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
+            onClick={() => {
+              setShowForm(!showForm);
+              setFormUser({
+                id: null,
+                username: "",
+                role: "USER",
+                password: "",
+              });
+            }}
             className="bg-san-marino-600 text-san-marino-50 px-4 py-2 rounded-lg hover:bg-san-marino-700 transition"
           >
             + Create New User
           </button>
         </div>
 
-        {/* Create User Form */}
-        {showCreateForm && (
+        {/* Create / Edit Form */}
+        {showForm && (
           <form
-            onSubmit={handleCreate}
+            onSubmit={handleSubmit}
             className="bg-san-marino-50 p-6 rounded-xl shadow-md mb-6 border border-san-marino-200"
           >
             <div className="flex flex-col md:flex-row gap-4">
               <input
                 type="text"
                 placeholder="Username"
-                value={newUser.username}
+                value={formUser.username}
                 onChange={(e) =>
-                  setNewUser({ ...newUser, username: e.target.value })
+                  setFormUser({ ...formUser, username: e.target.value })
                 }
                 className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
                 required
               />
-              <input
-                type="password"
-                placeholder="Password"
-                value={newUser.password}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, password: e.target.value })
-                }
-                className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
-                required
-              />
+              {!formUser.id && (
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={formUser.password}
+                  onChange={(e) =>
+                    setFormUser({ ...formUser, password: e.target.value })
+                  }
+                  className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
+                  required
+                />
+              )}
               <select
-                value={newUser.role}
+                value={formUser.role}
                 onChange={(e) =>
-                  setNewUser({ ...newUser, role: e.target.value })
+                  setFormUser({ ...formUser, role: e.target.value })
                 }
                 className="border border-san-marino-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-san-marino-500 transition"
                 required
@@ -155,7 +180,7 @@ export default function Users() {
                 type="submit"
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
               >
-                Create
+                {formUser.id ? "Update" : "Create"}
               </button>
             </div>
           </form>
@@ -182,7 +207,22 @@ export default function Users() {
                     <td className="py-3 px-4">{user.id}</td>
                     <td className="py-3 px-4">{user.username}</td>
                     <td className="py-3 px-4">{user.role}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 flex gap-2">
+                      {user.role !== "ADMIN" && (
+                        <button
+                          onClick={() => {
+                            setFormUser({
+                              id: user.id,
+                              username: user.username,
+                              role: user.role,
+                            });
+                            setShowForm(true);
+                          }}
+                          className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition"
+                        >
+                          Edit
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDelete(user.id!)}
                         className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition"
